@@ -1,0 +1,70 @@
+import org.micromanager.api.AcquisitionOptions;
+import java.lang.System;
+
+gui.closeAllAcquisitions();
+//gui.clearMessageWindow();
+
+
+
+numBefore = 2;
+numAfter = 5;
+interval = 500;
+exposure = 2000;
+gain = 500;
+gainon = "On";
+acqname = "29-05-12";
+
+YFPchan = "Direct Digital Out 2";
+bluechan = "Direct Digital Out 1";
+
+
+gui.openAcquisition(acqname,"C:/Users/User/Desktop", numBefore + numAfter, 1, 1 );
+
+// set up the camera
+cameraName = mmc.getCameraDevice();
+mmc.setExposure(exposure);
+mmc.setProperty( cameraName, "Binning", "1");
+mmc.setProperty( cameraName, "EMSwitch", gainon );
+mmc.setProperty( cameraName, "Gain", gain );
+
+// turn off the LEDs
+mmc.setProperty( "OptoLED", "Direct Digital Out 0", "0" );
+mmc.setProperty( "OptoLED", "Direct Digital Out 3", "0" );
+
+mmc.setProperty( "OptoLED", YFPchan, "0" );
+mmc.setProperty( "OptoLED", bluechan, "0" );
+
+// open the shutter
+mmc.setProperty( "Core", "AutoShutter", "0" );
+mmc.setProperty( "OptoLED", "Shutter", "0" );
+
+mmc.setProperty( "OptoLED", YFPchan, "0" );
+mmc.setProperty( "OptoLED", bluechan, "0" );
+
+for (int i=0; i<numBefore; i++)	{
+	now = System.currentTimeMillis();
+	mmc.setProperty( "OptoLED", YFPchan, "1" );
+	gui.snapAndAddImage(acqname, i, 0, 0 );
+	mmc.setProperty( "OptoLED", YFPchan, "0" );
+	itTook = System.currentTimeMillis() - now;
+	if ( itTook < interval )
+		gui.sleep( interval - itTook );
+}
+
+mmc.setProperty( "OptoLED", bluechan, "1" );
+for (int i=0; i<numAfter; i++)	{
+	now = System.currentTimeMillis();
+	mmc.setProperty( "OptoLED", YFPchan, "1" );
+	gui.snapAndAddImage(acqname, numBefore + i, 0, 0 );
+	mmc.setProperty( "OptoLED", YFPchan, "0" );
+	itTook = System.currentTimeMillis() - now;
+	if ( itTook < interval )
+		gui.sleep( interval - itTook );
+}
+mmc.setProperty( "OptoLED", bluechan, "0" );
+
+
+gui.refreshGUI();
+
+
+
